@@ -28,8 +28,8 @@
                       <td>{{user.id}}</td>
                       <td>{{user.name}}</td>
                       <td>{{user.email}}</td>
-                      <td>{{user.type}}</td>
-                      <td>{{user.created_at}}</td>
+                      <td>{{user.type | upText}}</td>
+                      <td>{{user.created_at | myDate}}</td>
                       <td>
                           <a href="#">
                               <i class ="fa fa-edit blue"> </i>
@@ -127,6 +127,7 @@
 
 
         })
+
             }
         },
         methods: {
@@ -136,11 +137,22 @@
                 axios.get("api/user").then(({ data }) => (this.users = data.data ));
             },
             createUser(){
+                this.$Progress.start();
                 this.form.post('api/user');
+                $('#addNew').modal('hide');
+                toast.fire({
+                        type: 'success',
+                        title: 'User created successfully'
+                        })
+                this.$Progress.finish();
             }
         },
         created() {
-           this.loadUsers();
-        }
+           this.loadUsers(); 
+           //setInterval(function(){this.loadUsers()}, 3000)
+           // we can use both above and following method, following method is ES6 syntax. so its good practise to use the following
+           setInterval(() => this.loadUsers(), 3000)
+    
+    }
     }
 </script>
