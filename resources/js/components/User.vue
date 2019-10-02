@@ -35,7 +35,7 @@
                               <i class ="fa fa-edit blue"> </i>
                           </a>
                           /
-                          <a href="#">
+                          <a href="#" @click="deleteUser(user.id)">
                               <i class="fa fa-trash red"> </i>
                           </a>
                       </td>
@@ -131,6 +131,34 @@
             }
         },
         methods: {
+            deleteUser(id){
+                swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true
+                }).then((result) => {
+                    if (result.value) {
+                    this.form.delete('api/user/'+id).then(() => {
+
+                            swal.fire(
+                            'Deleted!',
+                            'Your file has been deleted.',
+                            'success'
+                            )
+
+                        Fire.emit('AfterCreate');
+                    }).catch(() => {
+                        swal("Failed", "There are some error occured", "warning");
+                    });
+
+                }
+
+                })
+            },
 
             loadUsers(){
 
@@ -138,21 +166,36 @@
             },
             createUser(){
                 this.$Progress.start();
-                this.form.post('api/user');
-                $('#addNew').modal('hide');
-                toast.fire({
-                        type: 'success',
-                        title: 'User created successfully'
-                        })
-                this.$Progress.finish();
+                this.form.post('api/user')
+                .then(() => {
+                    Fire.emit('AfterCreate');
+                    $('#addNew').modal('hide');
+
+                    $('#addNew').on('hidden.bs.modal', function () {
+                        $(this).find('form').trigger('reset');
+                    })
+
+                    toast.fire({
+                            type: 'success',
+                            title: 'User created successfully'
+                            })
+                    this.$Progress.finish();
+                })
+                .catch(() => {
+
+                });
+
             }
         },
         created() {
-           this.loadUsers(); 
+           this.loadUsers();
+            Fire.$on('AfterCreate', () => {
+                this.loadUsers();
+            });
            //setInterval(function(){this.loadUsers()}, 3000)
            // we can use both above and following method, following method is ES6 syntax. so its good practise to use the following
-           setInterval(() => this.loadUsers(), 3000)
-    
+           //setInterval(() => this.loadUsers(), 3000)
+
     }
     }
 </script>
